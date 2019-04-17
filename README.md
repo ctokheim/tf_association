@@ -17,7 +17,7 @@ Then activate the environment:
 $ source activate UPS
 ```
 
-Next, you need to install rabit (see http://rabit.dfci.harvard.edu/download/).
+Next, you need to install rabit (see http://rabit.dfci.harvard.edu/download/). Then update the configuration file (config.yaml) to point to where you installed rabit.
 
 ## Data
 
