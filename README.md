@@ -49,4 +49,4 @@ $ OMP_NUM_THREADS=1 snakemake -p -k --cores=10 --config output=output
 
 If you want to run on a computer cluster, please see the snakemake documentation (https://snakemake.readthedocs.io/en/stable/).
 
-When the is completed, you should see the final output file "rabit_formatted_results.txt" in your specified output directory.
+When the run is completed, you should see the final output file "rabit_formatted_results.txt" in your specified output directory.
