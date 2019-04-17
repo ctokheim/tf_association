@@ -30,7 +30,7 @@ Next, filter the mutations (MAF file) by following instructions here (https://ww
 
 Now, update the configuration file (config.yaml) to point towards the mutation, gene expression and tumor purity files.
 
-Lastly, you will also need to download the cistrome interaction and background file for Rabit.
+Lastly, you will also need to download the cistrome interaction and background file for Rabit (https://www.dropbox.com/sh/l64jxw8ucwuiov6/AADkuapIpTvk9vniqqWkBBONa?dl=0).
 
 ## Command
 
