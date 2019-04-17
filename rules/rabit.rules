@@ -1,0 +1,86 @@
+###########################
+# Prepare rabit input
+###########################
+
+
+rule prepRabit:
+    input:
+        diff_expr=join(config['output'], 'gene_correlations/{ctype}.txt'),
+        gene2id=config['gene2id'],
+        expr=join(config['data_dir'], 'expr/{ctype}.txt'),
+    params:
+        exprQuant=config['expression_quantile'],
+        topVariability=config['top_variability']
+    output:
+        join(config['output'], 'rabit/input/{ctype}.txt') 
+    shell:
+        "python scripts/format_rabit_input.py "
+        "   -i {input.diff_expr} "
+        "   -c {input.gene2id} "
+        "   -e {input.expr} "
+        "   -eq {params.exprQuant} "
+        "   -t {params.topVariability} "
+        "   -o {output} "
+
+rule prepRabitAdj:
+    input:
+        diff_expr=join(config['output'], 'gene_correlations_rerun/{gene}.{ctype2}.txt'),
+        gene2id=config['gene2id'],
+        expr=join(config['data_dir'], 'expr/{ctype2}.txt'),
+    params:
+        exprQuant=config['expression_quantile'],
+        topVariability=config['top_variability']
+    output:
+        join(config['output'], 'rabit_rerun/input/{gene}.{ctype2}.txt') 
+    shell:
+        "python scripts/format_rabit_input.py "
+        "   -i {input.diff_expr} "
+        "   -c {input.gene2id} "
+        "   -e {input.expr} "
+        "   -eq {params.exprQuant} "
+        "   -t {params.topVariability} "
+        "   -o {output} "
+
+#######################
+# Run rabit
+#######################
+
+rule rabitCtype:
+    input:
+        cistrome=config['rabit_cistrome'],
+        background=config['rabit_bg'],
+        diff_expr=join(config['output'], 'rabit/input/{ctype}.txt')
+    params:
+        rabit=config['rabit_path']
+    output:
+        join(config['output'], 'rabit/output/{ctype}.txt') 
+    shell:
+        "if [ ! -s {input.diff_expr} ] \n"
+        "then \n"
+        "touch {output} \n"
+        "else \n"
+        "{params.rabit} "
+        "   -x {input.cistrome} "
+        "   -b {input.background} "
+        "   -y {input.diff_expr} "
+        "   -s 1 "
+        "   -o {output} \n"
+        "fi"
+
+# run rabit on differential expression profiles adjusted for TF expression
+rule rabitAdj:
+    input:
+        cistrome=config['rabit_cistrome'],
+        background=config['rabit_bg'],
+        diff_expr=join(config['output'], 'rabit_rerun/input/{gene}.{ctype2}.txt')
+    params:
+        rabit=config['rabit_path']
+    output:
+        join(config['output'], 'rabit_rerun/output/{gene}.{ctype2}.txt') 
+    shell:
+        "{params.rabit} "
+        "   -x {input.cistrome} "
+        "   -b {input.background} "
+        "   -y {input.diff_expr} "
+        "   -s 1 "
+        "   -o {output} "

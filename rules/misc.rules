@@ -1,0 +1,11 @@
+rule top10:
+    input:
+        expand(join(config['output'], 'rabit/output/{ctype}.txt'), ctype=cancer_types)
+    params:
+        outdir=config['output']
+    output:
+        dynamic(os.path.join(config['output'], 'top10_rabit/{gene}.{ctype2}.txt'))
+    shell:
+        "python scripts/pick_top_tfs.py "
+        "   -i {params.outdir}/rabit/output "
+        "   -o {params.outdir}/top10_rabit "

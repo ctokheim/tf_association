@@ -1,0 +1,39 @@
+rule prepData:
+    input:
+        expr_file=config['expression'],
+        mutation=config['mutation'],
+    params:
+        data=config['data_dir']
+    output:
+        join(config['data_dir'], "expr/{ctype}.txt"),
+        join(config['data_dir'], "mutation/{ctype}.txt"),
+    shell:
+        "python scripts/format_tcga_expression_and_mutation.py "
+        "   -i {input.expr_file} "
+        "   -c {wildcards.ctype} "
+        "   -m {input.mutation} "
+        "   -o {params.data} "
+
+rule flagSamples:
+    input:
+        mut=join(config['data_dir'], "mutation/{ctype}.txt"),
+    params:
+        driver_gene=config['driver_results'],
+        data_dir=config['data_dir']
+    output:
+        join(config['data_dir'], 'mutation_flags/{ctype}.txt')  
+    shell:
+        "python scripts/mark_driver_mutations.py "
+        "    -i {params.data_dir}/mutation/{wildcards.ctype}.txt "
+        "    -d {params.driver_gene}/{wildcards.ctype}.txt "
+        "    -o {output} "
+
+rule formatCopyNumber:
+    input:
+        cp_num=join(config['data_dir'], 'copy_number/original/{ctype}.focal_score_by_genes.txt')
+    output:
+        join(config['data_dir'], 'copy_number/formatted/{ctype}.txt')
+    shell:
+        "Rscript scripts/format_copy_number.R "
+        "   -i {input.cp_num} "
+        "   -o {output} "

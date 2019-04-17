@@ -1,0 +1,22 @@
+# directory to store processed data files
+data_dir: data/tcga_run2
+# RNA-seq expression 
+expression: ../../data/TCGA/EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv
+# Mutation data in MAF format
+mutation: ../../data/TCGA/mc3.v0.2.8.PUBLIC.code.filtered.small.maf
+# Directory containing Driver gene predictions for UPS pathway by 20/20+
+driver_results: data/tcga_ups_driver_gene_predictions
+# Cancer subtype file
+subtypes: data/tcga_cancer_subtypes.txt
+# Estimated tumor purity file from ABSOLUTE
+purity: data/TCGA_mastercalls.abs_tables_JSedit.fixed.txt
+# Directory containing copynumber estimates
+copy_number: place_holder
+# expression filters
+expression_quantile: 0.5
+top_variability: 3000
+# Rabit parameters
+rabit_path: ./bin/Rabit
+rabit_cistrome: data/interaction.Cistrome
+rabit_bg: data/interaction.Cistrome.background
+gene2id: data/geneName2ID.txt
