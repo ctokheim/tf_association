@@ -1,9 +1,9 @@
 """
-File: convert_to_entrez_id.py
+File: format_rabit_input.py
 Author: Collin Tokheim
 Email: ctokheim@mail.dfci.harvard.edu
 Github: ctokheim
-Description: Convert hugo gene names to entrez IDs
+Description: Prepare differential expression profile for input to rabit
 """
 import pandas as pd
 import numpy as np
@@ -11,7 +11,7 @@ import argparse
 
 
 def parse_arguments():
-    info = 'Convert hugo gene names to entrez IDs'
+    info = 'Prepare differential expression profile for input to rabit'
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument('-i', '--input',
                         type=str, required=True,
