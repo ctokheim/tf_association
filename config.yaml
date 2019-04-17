@@ -1,5 +1,5 @@
 # directory to store processed data files
-data_dir: data/tcga_run2
+data_dir: data
 # RNA-seq expression 
 expression: ../../data/TCGA/EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv
 # Mutation data in MAF format
