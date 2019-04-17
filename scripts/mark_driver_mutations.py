@@ -31,7 +31,8 @@ def main(opts):
     mut_df = pd.read_table(opts['input'])
     mut_df['PatientID'] = mut_df['Tumor_Sample_Barcode'].str[:12]
 
-    # find out the relevant type
+    # figure out which genes are cancer drivers and what type they are (oncogene
+    # or tumor suppressor)
     is_signif = driver_df['qvalue']<=0.05
     is_high_score = driver_df['score']>0.5
     driver_df = driver_df[is_signif & is_high_score]

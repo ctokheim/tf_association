@@ -3,7 +3,7 @@ File: format_rabit_results.py
 Author: Collin Tokheim
 Email: ctokheim@mail.dfci.harvard.edu
 Github: ctokheim
-Description: Format the output from Rabit runs
+Description: Format the final output from Rabit
 """
 import pandas as pd
 import argparse
@@ -13,7 +13,7 @@ import os
 
 
 def parse_arguments():
-    info = 'Pick out the most significant TFs'
+    info = 'Formate the final output from Rabit'
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument('-i', '--input',
                         type=str, required=True,
@@ -30,6 +30,7 @@ def parse_arguments():
 
 def main(opts):
     output_list = []
+    # iterate through each output file from rabit
     for f in glob.glob(os.path.join(opts['input'], '*.txt')):
         # figure out gene name / cancer type
         gene, ctype, _ = os.path.basename(f).split('.')
