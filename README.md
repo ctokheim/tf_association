@@ -32,12 +32,19 @@ Now, update the configuration file (config.yaml) to point towards the mutation, 
 
 Lastly, you will also need to download the cistrome interaction and background file for Rabit.
 
-I downloaded copy number from GDC on 4/4/2019.
+## Command
 
-## Commands
-
-The first step is to prepare/format the mutation and gene expression data.
+Once you have everything set up, you should be able to run the entire pipeline with one snakemake 
+command.
 
 ```bash
-$ snakemake preprocess
+$ snakemake -p -k --cores=10 --config output=output
 ```
+
+The above command will save results into the directory specified by the "output" parameter. Additionally, you can specify the number of cores to use with the `--cores` parameter. One thing to note is that the Statsmodels package tends to use all cores that are available on a machine for each thread. To ensure each job uses only one core, you will need to set the "OMP_NUM_THREADS" variable:
+
+```bash
+$ OMP_NUM_THREADS=1 snakemake -p -k --cores=10 --config output=output
+```
+
+If you want to run on a computer cluster, please see the snakemake documentation (https://snakemake.readthedocs.io/en/stable/).

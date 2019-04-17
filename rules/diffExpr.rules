@@ -23,7 +23,7 @@ rule diffExprAdj:
         top10_list = os.path.join(config['output'], 'top10_rabit/{gene}.{ctype2}.txt'),
         subtypes=config['subtypes'],
         purity=config['purity'],
-        cpnum=os.path.join(config['copy_number'], 'ESCA.focal_score_by_genes.txt'),
+        # cpnum=os.path.join(config['copy_number'], 'ESCA.focal_score_by_genes.txt'),
     params:
         expr=join(config['data_dir'], "expr/{ctype2}.txt"),
         mut=join(config['data_dir'], "mutation_flags/{ctype2}.txt")
@@ -38,5 +38,4 @@ rule diffExprAdj:
         "   -m {params.mut} "
         "   -g {wildcards.gene} "
         "   -a {input.top10_list} "
-        "   -c {input.cpnum} "
         "   -o {output} "

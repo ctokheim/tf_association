@@ -28,9 +28,9 @@ def parse_arguments():
     parser.add_argument('-l', '--log-transform',
                         action='store_true', default=False,
                         help='Whether to log transform the expression')
-    parser.add_argument('-c', '--copy-number',
-                        type=str, required=True,
-                        help='Copy number data')
+    #parser.add_argument('-c', '--copy-number',
+                        #type=str, required=True,
+                        #help='Copy number data')
     parser.add_argument('-a', '--adjusted-tfs',
                         type=str, required=True,
                         help='List of transcription factors for adjustment')
