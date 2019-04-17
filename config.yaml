@@ -19,4 +19,4 @@ top_variability: 3000
 rabit_path: ./bin/Rabit
 rabit_cistrome: data/interaction.Cistrome
 rabit_bg: data/interaction.Cistrome.background
-gene2id: data/geneName2ID.txt
+gene2id: data/geneName2ID.txt  # file with HUGO gene name and ENTREZ ID
