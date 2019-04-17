@@ -26,11 +26,11 @@ Please download tumor purity estimates, gene expression and mutation calls from 
 * Gene expression (EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv)
 * Tumor purity (TCGA_mastercalls.abs_tables_JSedit.fixed.txt)
 
-Next, filter the mutations (MAF file) by following instructions here (https://www.dropbox.com/sh/wglgggbgketh982/AABJEqQ2QdCEruy9c6UXBdjba?dl=0).
+Next, filter the mutations (MAF file) by following instructions [here](https://www.dropbox.com/sh/wglgggbgketh982/AABJEqQ2QdCEruy9c6UXBdjba?dl=0).
 
 Now, update the configuration file (config.yaml) to point towards the mutation, gene expression and tumor purity files.
 
-Lastly, you will also need to download the cistrome interaction and background file for Rabit (https://www.dropbox.com/sh/l64jxw8ucwuiov6/AADkuapIpTvk9vniqqWkBBONa?dl=0).
+Lastly, you will also need to download the cistrome interaction and background file for [Rabit](https://www.dropbox.com/sh/l64jxw8ucwuiov6/AADkuapIpTvk9vniqqWkBBONa?dl=0).
 
 ## Command
 
