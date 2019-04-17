@@ -3,6 +3,7 @@ import pandas as pd
 
 
 def read_rabit(path):
+    """Read the output file created by Rabit."""
     # read data
     with open(path) as handle:
         myreader = csv.reader(handle, delimiter='\t')
@@ -32,6 +33,7 @@ def read_rabit(path):
 
 
 def read_rabit_section(mylist):
+    """Read a section within the rabit output file."""
     # create dataframe
     df = pd.DataFrame(mylist[1:], columns=mylist[0])
 

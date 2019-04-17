@@ -23,9 +23,6 @@ def parse_arguments():
     parser.add_argument('-m', '--mutation',
                         type=str, required=True,
                         help='Mutation data')
-    parser.add_argument('-s', '--sample-ids',
-                        type=str, required=False,
-                        help='Only keep expression for listed samples')
     parser.add_argument('-o', '--output',
                         type=str, required=True,
                         help='Output directory')
