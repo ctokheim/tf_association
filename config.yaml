@@ -1,5 +1,5 @@
 # directory to store processed data files
-data_dir: data
+data_dir: data/tcga_run2
 # RNA-seq expression 
 expression: ../../data/TCGA/EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv
 # Mutation data in MAF format
@@ -10,8 +10,12 @@ driver_results: data/tcga_ups_driver_gene_predictions
 subtypes: data/tcga_cancer_subtypes.txt
 # Estimated tumor purity file from ABSOLUTE
 purity: data/TCGA_mastercalls.abs_tables_JSedit.fixed.txt
+# TCGA immune-related estimates
+immune: data/panimmune.txt
 # Directory containing copynumber estimates
 copy_number: place_holder
+# Cancer types to do analysis for
+cancer_types: ACC BLCA BRCA CESC CHOL COAD DLBC ESCA HNSC KIRC KIRP LAML LGG LIHC LUAD LUSC MESO PAAD PCPG PRAD READ SKCM STAD UCEC UCS UVM
 # expression filters
 expression_quantile: 0.5
 top_variability: 3000

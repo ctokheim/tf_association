@@ -22,6 +22,9 @@ def parse_arguments():
     parser.add_argument('-t', '--tumor-purity',
                         type=str, required=False, default=None,
                         help='Tumor purity')
+    parser.add_argument('-im', '--immune',
+                        type=str, required=False, default=None,
+                        help='TCGA panimmune estimates')
     parser.add_argument('-m', '--mutation',
                         type=str, required=True,
                         help='Mutation data')
@@ -67,7 +70,8 @@ def main(opts):
         'HNRNPLL': 'HNRPLL',
         'STAT5': 'STAT5A',
         'ZBTB14': 'ZFP161',
-        'ZFP69B': 'ZNF643'
+        'ZFP69B': 'ZNF643',
+        'KAT8': 'MYST1'
     }
     result_list = []
     for tf in tfs:

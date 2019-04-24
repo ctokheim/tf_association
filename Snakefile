@@ -6,10 +6,7 @@ configfile: "config.yaml"
 if 'output' not in config:
     config['output'] = 'output'
 
-#cancer_types = ['ACC', 'BLCA', 'BRCA', 'CESC', 'CHOL', 'COAD', 'DLBC', 'ESCA', 'GBM', 'HNSC', 'KICH', 'KIRC', 'KIRP', 'LAML', 'LGG', 'LIHC', 'LUAD', 'LUSC', 'MESO', 'OV', 'PAAD', 'PCPG', 'PRAD', 'READ', 'SARC', 'SKCM', 'STAD', 'TGCT', 'THCA', 'THYM', 'UCEC', 'UCS', 'UVM']
-cancer_types = ['ACC', 'BLCA', 'BRCA', 'CESC', 'CHOL', 'COAD', 'DLBC', 'ESCA', 'HNSC', 'KIRC', 'KIRP', 'LAML', 'LGG', 'LIHC', 'LUAD', 'LUSC', 'MESO', 'PAAD', 'PCPG', 'PRAD', 'READ', 'SKCM', 'STAD', 'UCEC', 'UCS', 'UVM']
-# cancer_types = ['METABRIC']
-# cancer_types = ['LUSC{0}'.format(i+1) for i in range(64)]
+cancer_types = config['cancer_types'].split(' ')
 
 include: 'rules/preprocess.rules'
 include: 'rules/diffExpr.rules'
@@ -27,7 +24,6 @@ rule preprocess:
     input:
         expand(join(config['data_dir'], "mutation_flags/{ctype}.txt"), ctype=cancer_types),
         expand(join(config['data_dir'], "expr/{ctype}.txt"), ctype=cancer_types),
-        #expand(join(config['data_dir'], 'copy_number/formatted/{ctype}.txt'), ctype=cancer_types)
 
 ########################
 # run diff expr analysis

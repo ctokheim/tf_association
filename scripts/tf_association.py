@@ -30,6 +30,9 @@ def parse_arguments():
     parser.add_argument('-t', '--tumor-purity',
                         type=str, required=False, default=None,
                         help='Tumor purity')
+    parser.add_argument('-im', '--immune',
+                        type=str, required=False, default=None,
+                        help='TCGA panimmune estimates')
     parser.add_argument('-m', '--mutation',
                         type=str, required=True,
                         help='Mutation data')
@@ -46,13 +49,65 @@ def parse_arguments():
     return vars(args)
 
 
+def add_tumor_purity(expr_df, purity_path):
+    """Add tumor purity to expression data"""
+    # read in purity
+    purity_df = pd.read_table(purity_path)
+    purity_df['PatientID'] = purity_df['sample'].str[:12]
+    purity_df = purity_df.drop_duplicates('PatientID')
+    purity_df = purity_df.set_index('PatientID')
+
+    # fill in purity
+    expr_df['purity'] = purity_df['purity']
+    expr_df['purity'] = expr_df['purity'].fillna(expr_df['purity'].mean())
+
+    return expr_df
+
+
+def add_tumor_subtype(expr_df, subtype_path):
+    """Add subtype information to expression data."""
+    # read in subtype information
+    subtype_df = pd.read_table(subtype_path)
+    patient2subtype = subtype_df.groupby('PATIENT_BARCODE')['SUBTYPE'].first().to_dict()
+
+    # fill in tumor subtypes
+    expr_df['subtype'] = 'Subtype:' + expr_df.index.map(patient2subtype).fillna('Not_Applicable')
+    unique_subtypes = list(expr_df['subtype'].unique())
+    num_subtypes = len(unique_subtypes)
+    tmp = expr_df.reset_index().rename(columns={'index':'PatientID'})[['intercept', 'PatientID', 'subtype']]
+    subtype_onehot = (
+        tmp.pivot(values='intercept',
+                    index='PatientID',
+                    columns='subtype')
+                    .fillna(0)
+                    .astype(int)
+    )
+    expr_df = pd.merge(expr_df, subtype_onehot,
+                       left_index=True, right_index=True, how='left')
+
+    return expr_df, unique_subtypes
+
+
+def add_leukocyte_infiltration(expr_df, immune_path):
+    # read in immune estimates
+    immune_df = pd.read_table(immune_path)
+    immune_df = immune_df.set_index('TCGA Participant Barcode')
+
+    # merge in leukoctye fraction
+    mycols = ['Leukocyte Fraction']
+    expr_df = pd.merge(expr_df, immune_df[mycols],
+                       left_index=True, right_index=True,
+                       how='left')
+
+    # fill missing values
+    expr_df['Leukocyte Fraction'] = expr_df['Leukocyte Fraction'].fillna(expr_df['Leukocyte Fraction'].mean())
+
+    return expr_df
+
+
 def main(opts, gene_list=None, covariate=None):
     # read in mutations
     mut_df = pd.read_table(opts['mutation'])
-
-    # read in subtype information
-    subtype_df = pd.read_table(opts['subtype'])
-    patient2subtype = subtype_df.groupby('PATIENT_BARCODE')['SUBTYPE'].first().to_dict()
 
     # read expression data
     expr_df = pd.read_table(opts['input'])
@@ -69,31 +124,17 @@ def main(opts, gene_list=None, covariate=None):
     # add intercept term
     expr_df['intercept'] = 1
 
+    # add tumor purity
     if opts['tumor_purity']:
-        # read in purity
-        purity_df = pd.read_table(opts['tumor_purity'])
-        purity_df['PatientID'] = purity_df['sample'].str[:12]
-        purity_df = purity_df.drop_duplicates('PatientID')
-        purity_df = purity_df.set_index('PatientID')
+        expr_df = add_tumor_purity(expr_df, opts['tumor_purity'])
 
-        # fill in purity
-        expr_df['purity'] = purity_df['purity']
-        expr_df['purity'] = expr_df['purity'].fillna(expr_df['purity'].mean())
+    # add immune infiltration
+    if opts['immune']:
+        expr_df = add_leukocyte_infiltration(expr_df, opts['immune'])
 
-    # fill in tumor subtypes
-    expr_df['subtype'] = 'Subtype:' + expr_df.index.map(patient2subtype).fillna('Not_Applicable')
-    unique_subtypes = list(expr_df['subtype'].unique())
+    # add subtype information
+    expr_df, unique_subtypes = add_tumor_subtype(expr_df, opts['subtype'])
     num_subtypes = len(unique_subtypes)
-    tmp = expr_df.reset_index().rename(columns={'index':'PatientID'})[['intercept', 'PatientID', 'subtype']]
-    subtype_onehot = (
-        tmp.pivot(values='intercept',
-                  index='PatientID',
-                  columns='subtype')
-                  .fillna(0)
-                  .astype(int)
-    )
-    expr_df = pd.merge(expr_df, subtype_onehot,
-                       left_index=True, right_index=True, how='left')
 
     # iterate through each gene
     output_dict = {}
@@ -113,6 +154,9 @@ def main(opts, gene_list=None, covariate=None):
             mycols = ['intercept', 'mutation']
         if opts['tumor_purity']:
             mycols += ['purity']
+        if opts['immune'] and expr_df['Leukocyte Fraction'].isnull().sum()==0:
+            mycols += ['Leukocyte Fraction']
+
         # add additional covariate if specified
         if covariate:
             mycols.append(covariate)
@@ -120,18 +164,22 @@ def main(opts, gene_list=None, covariate=None):
         if covariate:
             X[covariate] = X[covariate].fillna(X[covariate].mean())
 
-        # regress against all genes
-        output_list = []
-        for gene2 in (set(all_genes) - set([gene])):
-            y = expr_df[gene2]
-            result = sm.OLS(y, X).fit()
-            t_stats = result.params / result.bse
-            mut_t_stat = t_stats.loc['mutation']
-            output_list.append([gene2, mut_t_stat])
+        # drop any missing
+        X = X.dropna()
 
-        # save output
-        output_series = pd.DataFrame(output_list, columns=['gene', gene]).set_index('gene')[gene]
-        output_dict[gene] = output_series
+        if len(X):
+            # regress against all genes
+            output_list = []
+            for gene2 in (set(all_genes) - set([gene])):
+                y = expr_df[gene2]
+                result = sm.OLS(y, X).fit()
+                t_stats = result.params / result.bse
+                mut_t_stat = t_stats.loc['mutation']
+                output_list.append([gene2, mut_t_stat])
+
+            # save output
+            output_series = pd.DataFrame(output_list, columns=['gene', gene]).set_index('gene')[gene]
+            output_dict[gene] = output_series
 
     # save output
     rename_dict = {'index': 'gene'}

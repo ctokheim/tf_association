@@ -4,6 +4,7 @@ rule diffExprCtype:
         subtypes=config['subtypes'],
         purity=config['purity'],
         mut=join(config['data_dir'], "mutation_flags/{ctype}.txt"),
+        immune=config['immune']
     output:
         join(config['output'], 'gene_correlations/{ctype}.txt')
     shell:
@@ -12,6 +13,7 @@ rule diffExprCtype:
         "   -s {input.subtypes} "
         "   -t {input.purity} "
         "   -l "
+        #"   -im {input.immune} "
         "   -m {input.mut} "
         "   -o {output} "
 
@@ -23,6 +25,7 @@ rule diffExprAdj:
         top10_list = os.path.join(config['output'], 'top10_rabit/{gene}.{ctype2}.txt'),
         subtypes=config['subtypes'],
         purity=config['purity'],
+        immune=config['immune']
         # cpnum=os.path.join(config['copy_number'], 'ESCA.focal_score_by_genes.txt'),
     params:
         expr=join(config['data_dir'], "expr/{ctype2}.txt"),
@@ -34,6 +37,7 @@ rule diffExprAdj:
         "   -i {params.expr} "
         "   -s {input.subtypes} "
         "   -t {input.purity} "
+        #"   -im {input.immune} "
         "   -l "
         "   -m {params.mut} "
         "   -g {wildcards.gene} "
