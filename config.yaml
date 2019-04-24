@@ -16,7 +16,8 @@ immune: data/panimmune.txt
 copy_number: place_holder
 # Cancer types to do analysis for
 cancer_types: ACC BLCA BRCA CESC CHOL COAD DLBC ESCA HNSC KIRC KIRP LAML LGG LIHC LUAD LUSC MESO PAAD PCPG PRAD READ SKCM STAD UCEC UCS UVM
-# expression filters
+# expression parameters
+log_transform: True
 expression_quantile: 0.5
 top_variability: 3000
 # Rabit parameters
