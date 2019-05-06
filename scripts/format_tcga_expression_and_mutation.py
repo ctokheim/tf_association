@@ -34,7 +34,8 @@ def main(opts):
     # read in mutations
     mut_df = pd.read_table(opts['mutation'])
     ctype = opts['cancer_type']
-    mut_df = mut_df[mut_df['CODE']==ctype]
+    if ctype != 'PANCAN':
+        mut_df = mut_df[mut_df['CODE']==ctype]
     # save mutation data
     mut_path = os.path.join(opts['output'], 'mutation/{0}.txt'.format(ctype))
     mut_df.to_csv(mut_path, sep='\t', index=False)
