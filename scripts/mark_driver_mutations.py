@@ -18,6 +18,9 @@ def parse_arguments():
     parser.add_argument('-d', '--driver',
                         type=str, required=True,
                         help='File containing driver genes')
+    parser.add_argument('-m', '--missense',
+                        type=str, required=True,
+                        help='Missense driver calls')
     parser.add_argument('-o', '--output',
                         type=str, required=True,
                         help='Output file')
@@ -30,6 +33,16 @@ def main(opts):
     driver_df = pd.read_table(opts['driver'])
     mut_df = pd.read_table(opts['input'])
     mut_df['PatientID'] = mut_df['Tumor_Sample_Barcode'].str[:12]
+
+    if opts['missense']:
+        mis_df = pd.read_table(opts['missense'])
+        mis_df['driver'] = 1
+        mut_df = pd.merge(mut_df, mis_df,
+                          left_on=['Hugo_Symbol', 'HGVSp_Short'],
+                          right_on=['gene', 'mutation'],
+                          how='left')
+    else:
+        mut_df.loc[mut_df['Variant_Classification'] == 'Missense_Mutation', 'driver'] = 1
 
     # figure out which genes are cancer drivers and what type they are (oncogene
     # or tumor suppressor)
@@ -56,21 +69,23 @@ def main(opts):
         # flag mutations
         is_gene = mut_df['Hugo_Symbol'] == gene
         mut_df[gene] = 0
+        is_driver = mut_df['driver'] == 1
         if 'oncogene' in driver_types:
             is_var = mut_df['Variant_Classification'].isin(og_var_list)
-            mut_df.loc[is_gene & is_var, gene] = 1
+            mut_df.loc[is_gene & is_var & is_driver, gene] = 1
         if 'tsg' in driver_types:
             is_var = mut_df['Variant_Classification'].isin(tsg_var_list)
-            mut_df.loc[is_gene & is_var, gene] = 1
+            mut_df.loc[is_gene & (is_var | is_driver), gene] = 1
         if len(driver_types)==1 and driver_types[0]=='driver':
-            is_var = mut_df['Variant_Classification'].isin(driver_var_list)
-            mut_df.loc[is_gene & is_var, gene] = 1
+            is_var = mut_df['Variant_Classification'].isin(tsg_var_list)
+            mut_df.loc[is_gene & (is_var | is_driver), gene] = 1
 
         # flag by patient id
         patient_flags = mut_df.groupby('PatientID')[gene].max()
 
         # add to output
-        output_dict[gene] = patient_flags
+        if patient_flags.sum():
+            output_dict[gene] = patient_flags
 
     # save results
     output_df = pd.DataFrame(output_dict)

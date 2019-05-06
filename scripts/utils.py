@@ -1,5 +1,8 @@
 import csv
 import pandas as pd
+import os
+import glob
+import csv
 
 
 def read_rabit(path):
@@ -55,3 +58,19 @@ def read_rabit_section(mylist):
     df['tf'] = df.chipseq.str.extract('[0-9]+\.(.+)@[0-9]+')
 
     return df
+
+
+def check_signif_cancer_types(mut_dir, gene):
+    """Check which cancer types the gene is significant in"""
+    # figure out which cancer types it is significant in
+    ctype_list = []
+    for f in glob.glob(os.path.join(mut_dir, '*.txt')):
+        with open(f) as handle:
+            myreader = csv.reader(handle, delimiter='\t')
+            header = next(myreader)
+            if gene in header:
+                ctype = os.path.basename(f)[:-4]
+                if ctype != 'PANCAN':
+                    ctype_list.append(ctype)
+
+    return ctype_list

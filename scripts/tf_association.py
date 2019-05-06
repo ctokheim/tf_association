@@ -13,6 +13,7 @@ import statsmodels.api as sm
 from numpy.random import RandomState
 import csv
 import os
+import utils
 
 import warnings
 warnings.filterwarnings("error")
@@ -64,10 +65,14 @@ def add_tumor_purity(expr_df, purity_path):
     return expr_df
 
 
-def add_tumor_subtype(expr_df, subtype_path):
+def add_tumor_subtype(expr_df, subtype_path, is_pancan=False):
     """Add subtype information to expression data."""
     # read in subtype information
     subtype_df = pd.read_table(subtype_path)
+
+    # relate patient ID to subtype
+    if is_pancan:
+        subtype_df['SUBTYPE'] = subtype_df['DISEASE'] + '_' + subtype_df['SUBTYPE']
     patient2subtype = subtype_df.groupby('PATIENT_BARCODE')['SUBTYPE'].first().to_dict()
 
     # fill in tumor subtypes
@@ -77,13 +82,14 @@ def add_tumor_subtype(expr_df, subtype_path):
     tmp = expr_df.reset_index().rename(columns={'index':'PatientID'})[['intercept', 'PatientID', 'subtype']]
     subtype_onehot = (
         tmp.pivot(values='intercept',
-                    index='PatientID',
-                    columns='subtype')
-                    .fillna(0)
-                    .astype(int)
+                  index='PatientID',
+                  columns='subtype')
+                  .fillna(0)
+                  .astype(int)
     )
     expr_df = pd.merge(expr_df, subtype_onehot,
-                       left_index=True, right_index=True, how='left')
+                       left_index=True, right_index=True,
+                       how='left')
 
     return expr_df, unique_subtypes
 
@@ -133,34 +139,54 @@ def main(opts, gene_list=None, covariate=None):
         expr_df = add_leukocyte_infiltration(expr_df, opts['immune'])
 
     # add subtype information
-    expr_df, unique_subtypes = add_tumor_subtype(expr_df, opts['subtype'])
+    is_pancan = os.path.basename(opts['mutation'])[:-4] == 'PANCAN'
+    expr_df, unique_subtypes = add_tumor_subtype(expr_df, opts['subtype'], is_pancan=is_pancan)
     num_subtypes = len(unique_subtypes)
 
     # iterate through each gene
     output_dict = {}
     for gene in gene_list:
+        # if pancan, check ctypes
+        if is_pancan:
+            mut_dir = os.path.dirname(opts['mutation'])
+            ctypes = utils.check_signif_cancer_types(mut_dir, gene)
+            if len(ctypes) == 1: continue
+            is_in_ctypes = expr_df['subtype'].str.split('_', expand=True)[0].str[8:].isin(ctypes)
+            expr_df2 = expr_df[is_in_ctypes].copy()
+        else:
+            expr_df2 = expr_df
+
+        # identify mut vs wt samps
         mut_samps = mut_df.loc[mut_df[gene]==1, 'PatientID'].tolist()
         wt_samps = mut_df.loc[mut_df[gene]==0, 'PatientID'].tolist()
 
         # label mutations
-        expr_df['mutation'] = 0
-        is_mut_samp = expr_df.index.isin(mut_samps)
-        expr_df.loc[is_mut_samp, 'mutation'] = 1
+        expr_df2['mutation'] = 0
+        is_mut_samp = expr_df2.index.isin(mut_samps)
+        expr_df2.loc[is_mut_samp, 'mutation'] = 1
 
         # create feature matrix
         if num_subtypes > 1:
-            mycols = unique_subtypes[:-1] + ['intercept', 'mutation']
+            # remove any column which doesn't have at least two unique values
+            unique_subtypes_cpy  = unique_subtypes.copy()
+            num_uniq = expr_df2.nunique()
+            constant_columns = num_uniq[num_uniq<2].index.tolist()
+            for c in (set(constant_columns) & set(unique_subtypes_cpy)):
+                unique_subtypes_cpy.remove(c)
+
+            # now only add flags for the relevant subtypes
+            mycols = unique_subtypes_cpy[:-1] + ['intercept', 'mutation']
         else:
             mycols = ['intercept', 'mutation']
         if opts['tumor_purity']:
             mycols += ['purity']
-        if opts['immune'] and expr_df['Leukocyte Fraction'].isnull().sum()==0:
+        if opts['immune'] and expr_df2['Leukocyte Fraction'].isnull().sum()==0:
             mycols += ['Leukocyte Fraction']
 
         # add additional covariate if specified
         if covariate:
             mycols.append(covariate)
-        X = expr_df[mycols].copy()
+        X = expr_df2[mycols].copy()
         if covariate:
             X[covariate] = X[covariate].fillna(X[covariate].mean())
 
@@ -171,7 +197,7 @@ def main(opts, gene_list=None, covariate=None):
             # regress against all genes
             output_list = []
             for gene2 in (set(all_genes) - set([gene])):
-                y = expr_df[gene2]
+                y = expr_df2[gene2]
                 result = sm.OLS(y, X).fit()
                 t_stats = result.params / result.bse
                 mut_t_stat = t_stats.loc['mutation']

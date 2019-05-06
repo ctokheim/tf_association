@@ -26,6 +26,7 @@ rule flagSamples:
         "python scripts/mark_driver_mutations.py "
         "    -i {params.data_dir}/mutation/{wildcards.ctype}.txt "
         "    -d {params.driver_gene}/{wildcards.ctype}.txt "
+        "    -m {params.data_dir}/driver_missense/{wildcards.ctype}.txt "
         "    -o {output} "
 
 rule formatCopyNumber:
