@@ -23,7 +23,7 @@ rule all:
 rule preprocess:
     input:
         expand(join(config['data_dir'], "mutation_flags/{ctype}.txt"), ctype=cancer_types),
-        expand(join(config['data_dir'], "expr/{ctype}.txt"), ctype=cancer_types),
+        expand(join(config['data_dir'], "expr/{ctype}.txt"), ctype=cancer_types)
 
 ########################
 # run diff expr analysis
