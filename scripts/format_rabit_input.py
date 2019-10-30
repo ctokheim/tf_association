@@ -37,10 +37,10 @@ def parse_arguments():
 
 def main(opts):
     # read input
-    df = pd.read_table(opts['input'])
+    df = pd.read_csv(opts['input'], sep='\t')
 
     # read in expression data and filter to relevant subset
-    expr_df = pd.read_table(opts['expression'], index_col=0)
+    expr_df = pd.read_csv(opts['expression'], index_col=0, sep='\t')
     expr_df = np.log2(expr_df+1)
     meds = expr_df.median(axis=1).rank(pct=True)
     top_expressed = meds[meds>opts['expressed_quantile']].index
@@ -52,7 +52,7 @@ def main(opts):
     #df = df[df['gene'].isin(most_variable)]
 
     # read in gene conversion file
-    gene2id = pd.read_table(opts['conversion'], dtype={'gene': str, 'entrez_id':str})
+    gene2id = pd.read_csv(opts['conversion'], sep='\t', dtype={'gene': str, 'entrez_id':str})
     rename_dict = dict(gene2id.values)
 
     # replace gene names
