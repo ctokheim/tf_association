@@ -15,8 +15,8 @@ import csv
 import os
 import utils
 
-import warnings
-warnings.filterwarnings("error")
+#import warnings
+#warnings.filterwarnings("error")
 
 
 def parse_arguments():
@@ -53,7 +53,7 @@ def parse_arguments():
 def add_tumor_purity(expr_df, purity_path):
     """Add tumor purity to expression data"""
     # read in purity
-    purity_df = pd.read_table(purity_path)
+    purity_df = pd.read_csv(purity_path, sep='\t')
     purity_df['PatientID'] = purity_df['sample'].str[:12]
     purity_df = purity_df.drop_duplicates('PatientID')
     purity_df = purity_df.set_index('PatientID')
@@ -68,7 +68,7 @@ def add_tumor_purity(expr_df, purity_path):
 def add_tumor_subtype(expr_df, subtype_path, is_pancan=False):
     """Add subtype information to expression data."""
     # read in subtype information
-    subtype_df = pd.read_table(subtype_path)
+    subtype_df = pd.read_csv(subtype_path, sep='\t')
 
     # relate patient ID to subtype
     if is_pancan:
@@ -96,7 +96,7 @@ def add_tumor_subtype(expr_df, subtype_path, is_pancan=False):
 
 def add_leukocyte_infiltration(expr_df, immune_path):
     # read in immune estimates
-    immune_df = pd.read_table(immune_path)
+    immune_df = pd.read_csv(immune_path, sep='\t')
     immune_df = immune_df.set_index('TCGA Participant Barcode')
 
     # merge in leukoctye fraction
@@ -113,10 +113,10 @@ def add_leukocyte_infiltration(expr_df, immune_path):
 
 def main(opts, gene_list=None, covariate=None):
     # read in mutations
-    mut_df = pd.read_table(opts['mutation'])
+    mut_df = pd.read_csv(opts['mutation'], sep='\t')
 
     # read expression data
-    expr_df = pd.read_table(opts['input'])
+    expr_df = pd.read_csv(opts['input'], sep='\t')
     expr_df = expr_df.drop_duplicates(subset=['gene_id'])
     expr_df = expr_df.set_index('gene_id').T
     if opts['log_transform']:
