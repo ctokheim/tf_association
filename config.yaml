@@ -5,7 +5,7 @@ expression: ../../data/TCGA/EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneEx
 # Mutation data in MAF format
 mutation: ../../data/TCGA/mc3.v0.2.8.PUBLIC.code.filtered.small.maf
 # Directory containing Driver gene predictions for UPS pathway by 20/20+
-driver_results: data/tcga_ups_driver_gene_predictions_v2
+driver_results: data/tcga_ups_driver_gene_predictions
 # Cancer subtype file
 subtypes: data/tcga_cancer_subtypes.txt
 # Estimated tumor purity file from ABSOLUTE
