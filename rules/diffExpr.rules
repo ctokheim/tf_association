@@ -1,3 +1,5 @@
+# vim: syntax=snakemake
+
 rule diffExprCtype:
     input:
         expr=join(config['data_dir'], "expr/{ctype}.txt"),
