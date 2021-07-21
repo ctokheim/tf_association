@@ -26,7 +26,7 @@ Please download tumor purity estimates, gene expression and mutation calls from 
 * Gene expression (EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv)
 * Tumor purity (TCGA_mastercalls.abs_tables_JSedit.fixed.txt)
 
-Next, filter the mutations (MAF file) by following instructions [here](https://www.dropbox.com/sh/wglgggbgketh982/AABJEqQ2QdCEruy9c6UXBdjba?dl=0).
+Next, filter the mutations (MAF file) by following instructions [here](https://www.dropbox.com/sh/iarmohkhaw2jwyo/AAATHCOwM96REdrWCDoqRuo-a?dl=0).
 
 Now, update the configuration file (config.yaml) to point towards the mutation, gene expression and tumor purity files.
 
